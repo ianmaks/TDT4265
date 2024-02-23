@@ -7,40 +7,40 @@ from task2 import SoftmaxTrainer, calculate_accuracy
 
 def main():
     # hyperparameters DO NOT CHANGE IF NOT SPECIFIED IN ASSIGNMENT TEXT
-    num_epochs = 50
-    learning_rate = .1
-    batch_size = 32
-    neurons_per_layer = [64 , 10]
-    momentum_gamma = .9  # Task 3 hyperparameter
-    shuffle_data = True
+    # num_epochs = 50
+    # learning_rate = .1
+    # batch_size = 32
+    # neurons_per_layer = [64, 10]
+    # momentum_gamma = .9  # Task 3 hyperparameter
+    # shuffle_data = True
 
-    use_improved_sigmoid = False
-    use_improved_weight_init = False
-    use_momentum = False
-    use_relu = False
+    # use_improved_sigmoid = False
+    # use_improved_weight_init = False
+    # use_momentum = False
+    # use_relu = False
 
-    # Load dataset
-    X_train, Y_train, X_val, Y_val = utils.load_full_mnist()
-    X_train = pre_process_images(X_train)
-    X_val = pre_process_images(X_val)
-    Y_train = one_hot_encode(Y_train, 10)
-    Y_val = one_hot_encode(Y_val, 10)
+    # # Load dataset
+    # X_train, Y_train, X_val, Y_val = utils.load_full_mnist()
+    # X_train = pre_process_images(X_train)
+    # X_val = pre_process_images(X_val)
+    # Y_train = one_hot_encode(Y_train, 10)
+    # Y_val = one_hot_encode(Y_val, 10)
 
-    model = SoftmaxModel(
-        neurons_per_layer,
-        use_improved_sigmoid,
-        use_improved_weight_init,
-        use_relu)
-    trainer = SoftmaxTrainer(
-        momentum_gamma, use_momentum,
-        model, learning_rate, batch_size, shuffle_data,
-        X_train, Y_train, X_val, Y_val,
-    )
+    # model = SoftmaxModel(
+    #     neurons_per_layer,
+    #     use_improved_sigmoid,
+    #     use_improved_weight_init,
+    #     use_relu)
+    # trainer = SoftmaxTrainer(
+    #     momentum_gamma, use_momentum,
+    #     model, learning_rate, batch_size, shuffle_data,
+    #     X_train, Y_train, X_val, Y_val,
+    # )
     
-    for i in range(2):
-        model.ws[i] = np.random.uniform(-1, 1, size=model.ws[i].shape)
+    # for i in range(2):
+    #     model.ws[i] = np.random.uniform(-1, 1, size=model.ws[i].shape)
     
-    train_history, val_history = trainer.train(num_epochs)
+    # train_history, val_history = trainer.train(num_epochs)
     
     # print("Train accuracy:", calculate_accuracy(X_train, Y_train, model))
     # print("Validation accuracy:", calculate_accuracy(X_val, Y_val, model))
@@ -101,13 +101,13 @@ def main():
     num_epochs = 50
     learning_rate = .1
     batch_size = 32
-    neurons_per_layer = [64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 10]
+    neurons_per_layer = [60, 60, 10]
     momentum_gamma = .9  # Task 3 hyperparameter
     shuffle_data = True
 
     use_improved_sigmoid = True
     use_improved_weight_init = True
-    use_momentum = True
+    use_momentum = False
     use_relu = False
 
     # Load dataset
@@ -141,28 +141,47 @@ def main():
     train_history_big_layer, val_history_big_layer=trainer.train(num_epochs)
     
     # Make 2 plots one with loss and one with accuracy comparing all 4 netwroks
+    # plt.figure(figsize=(20, 12))
+    # plt.subplot(1, 2, 1)
+    # plt.ylim([0.0, 50])
+    # utils.plot_loss(train_history["loss"], "Training Loss baseline")
+    # utils.plot_loss(train_history_big_layer["loss"], "Training Loss with 2 hidden layers")
+    
+    # plt.legend()
+    # plt.xlabel("Number of Training Steps")
+    # plt.ylabel("Cross Entropy Loss - Average")
+    # # Plot accuracy
+    # plt.subplot(1, 2, 2)
+    # plt.ylim([0.8, 0.99])
+    # utils.plot_loss(val_history["accuracy"], "Validation Accuracy baseline")
+    # utils.plot_loss(val_history_big_layer["accuracy"], "Validation Accuracy with 2 hidden layers")
+   
+    # plt.xlabel("Number of Training Steps")
+    # plt.ylabel("Accuracy")
+    # plt.legend()
+    # plt.savefig("task3_train_loss_128.png")
+    # plt.show()
+    
+    # Task 4d
     plt.figure(figsize=(20, 12))
     plt.subplot(1, 2, 1)
-    plt.ylim([0.0, 50])
-    utils.plot_loss(train_history["loss"], "Training Loss baseline")
-    utils.plot_loss(train_history_big_layer["loss"], "Training Loss with 10 hidden layers")
-    
+    plt.ylim([0.0, 0.9])
+    utils.plot_loss(train_history_big_layer["loss"],
+                    "Training Loss", npoints_to_average=10)
+    utils.plot_loss(val_history_big_layer["loss"], "Validation Loss")
     plt.legend()
     plt.xlabel("Number of Training Steps")
     plt.ylabel("Cross Entropy Loss - Average")
     # Plot accuracy
     plt.subplot(1, 2, 2)
     plt.ylim([0.8, 0.99])
-    utils.plot_loss(val_history["accuracy"], "Validation Accuracy baseline")
-    utils.plot_loss(val_history_big_layer["accuracy"], "Validation Accuracy with 10 hidden layers")
-   
+    utils.plot_loss(train_history_big_layer["accuracy"], "Training Accuracy")
+    utils.plot_loss(val_history_big_layer["accuracy"], "Validation Accuracy")
     plt.xlabel("Number of Training Steps")
     plt.ylabel("Accuracy")
     plt.legend()
-    plt.savefig("task3_train_loss_128.png")
+    plt.savefig("task4d.png")
     plt.show()
-    
-
    
 
 if __name__ == "__main__":
