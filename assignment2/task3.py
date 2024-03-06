@@ -14,8 +14,8 @@ def main():
     momentum_gamma = .9  # Task 3 hyperparameter
     shuffle_data = True
 
-    use_improved_sigmoid = False
-    use_improved_weight_init = False
+    use_improved_sigmoid = True
+    use_improved_weight_init = True
     use_momentum = False
     use_relu = False
 
@@ -37,8 +37,8 @@ def main():
         X_train, Y_train, X_val, Y_val,
     )
     
-    for i in range(2):
-        model.ws[i] = np.random.uniform(-1, 1, size=model.ws[i].shape)
+    # for i in range(2):
+    #     model.ws[i] = np.random.uniform(-1, 1, size=model.ws[i].shape)
     
     train_history, val_history = trainer.train(num_epochs)
     
@@ -99,7 +99,7 @@ def main():
     #     num_epochs)
     
     num_epochs = 50
-    learning_rate = .1
+    learning_rate = 0.1
     batch_size = 32
     neurons_per_layer = [64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 10]
     momentum_gamma = .9  # Task 3 hyperparameter
@@ -107,7 +107,7 @@ def main():
 
     use_improved_sigmoid = True
     use_improved_weight_init = True
-    use_momentum = True
+    use_momentum = False
     use_relu = False
 
     # Load dataset
@@ -143,7 +143,7 @@ def main():
     # Make 2 plots one with loss and one with accuracy comparing all 4 netwroks
     plt.figure(figsize=(20, 12))
     plt.subplot(1, 2, 1)
-    plt.ylim([0.0, 50])
+    plt.ylim([0.0, 0.99])
     utils.plot_loss(train_history["loss"], "Training Loss baseline")
     utils.plot_loss(train_history_big_layer["loss"], "Training Loss with 10 hidden layers")
     
