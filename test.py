@@ -10,3 +10,4 @@ soble_kernel = np.array([[-1, 0, 1],
                          [-1, 0, 1]])
 
 print(scipy.ndimage.convolve(image,soble_kernel,mode='constant'))
+

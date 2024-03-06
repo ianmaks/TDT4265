@@ -68,9 +68,15 @@ class ExampleModel(nn.Module):
             nn.ReLU(),
             
             nn.MaxPool2d(kernel_size=2, stride=2),    
-             
             nn.Conv2d(
                 in_channels=512,
+                out_channels=750,
+                kernel_size=kernel_size,
+                stride=stride,
+                padding=padding,
+            ), 
+            nn.Conv2d(
+                in_channels=750,
                 out_channels=1024,
                 kernel_size=kernel_size,
                 stride=stride,
@@ -99,7 +105,7 @@ class ExampleModel(nn.Module):
             nn.BatchNorm1d(64),
             nn.ReLU(),
             nn.Linear(64, num_classes),
-            # nn.Softmax()
+            # nn.Softmax(dim=1)
         )
 
     def forward(self, x):
@@ -142,7 +148,7 @@ def create_plots(trainer: Trainer, name: str):
 
 def main():
     # Set the random generator seed (parameters, shuffling etc).
-    # You can try to change this and check if you still get the same result!
+     # You can try to change this and check if you still get the same result!
     utils.set_seed(0)
     print(f"Using device: {utils.get_device()}")
     epochs = 10
