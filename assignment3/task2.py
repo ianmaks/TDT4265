@@ -40,36 +40,48 @@ class ExampleModel(nn.Module):
             
             nn.Conv2d(
                 in_channels=num_filters,
-                out_channels=64,
+                out_channels=128,
                 kernel_size=5,
                 stride=stride,
                 padding=2,
             ),
+            nn.BatchNorm2d(128),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
             
             nn.Conv2d(
-                    in_channels=64,
-                    out_channels=128,
+                    in_channels=128,
+                    out_channels=256,
+                    kernel_size=5,
+                    stride=stride,
+                    padding=2,
+                ),
+            nn.ReLU(),
+            nn.Conv2d(
+                    in_channels=256,
+                    out_channels=512,
                     kernel_size=kernel_size,
                     stride=stride,
                     padding=padding,
                 ),
+            nn.BatchNorm2d(512),
             nn.ReLU(),
+            
             nn.MaxPool2d(kernel_size=2, stride=2),    
              
             nn.Conv2d(
-                in_channels=128,
-                out_channels=256,
+                in_channels=512,
+                out_channels=1024,
                 kernel_size=kernel_size,
                 stride=stride,
                 padding=padding,
             ),
+            nn.BatchNorm2d(1024),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)       
+            nn.MaxPool2d(kernel_size=2, stride=2)
         )
         # The output of feature_extractor will be [batch_size, num_filters, 4, 4]
-        self.num_output_features = 4*4*256
+        self.num_output_features = 4*4*512*2
         # Initialize our last fully connected layer
         # Inputs all extracted features from the convolutional layers
         # Outputs num_classes predictions, 1 for each class.
@@ -77,7 +89,14 @@ class ExampleModel(nn.Module):
         # included with nn.CrossEntropyLoss
         self.classifier = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(self.num_output_features, 64),
+            nn.Linear(self.num_output_features, 2048),
+            nn.BatchNorm1d(2048),
+            nn.ReLU(),
+            nn.Linear(2048, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
+            nn.Linear(512, 64),
+            nn.BatchNorm1d(64),
             nn.ReLU(),
             nn.Linear(64, num_classes),
             # nn.Softmax()
@@ -101,7 +120,7 @@ class ExampleModel(nn.Module):
         return out
 
 
-def create_plots(trainer: Trainer, name: str):
+def create_plots(trainer: Trainer, name: str): 
     plot_path = pathlib.Path("plots")
     plot_path.mkdir(exist_ok=True)
     # Save plots and show them
@@ -141,7 +160,7 @@ def main():
     trainer.train()
     
     create_plots(trainer, "task2")
-    
+        
     from trainer import compute_loss_and_accuracy
     # Check test accuracy
     test_loss, test_accuracy = compute_loss_and_accuracy(
