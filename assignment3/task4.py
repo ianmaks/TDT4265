@@ -30,8 +30,6 @@ class Model(nn.Module):
     def forward(self, x):
         x = self.model(x)
         return x
-    
-
 
 def main():
     # Set the random generator seed (parameters, shuffling etc).
