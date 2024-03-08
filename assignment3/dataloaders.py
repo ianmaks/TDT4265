@@ -16,23 +16,48 @@ def get_data_dir():
         return str(server_dir)
     return "data/cifar10"
 
+def extend_dataset(data: torch.utils.data.Dataset):
+    """"Adds transformed images to the dataset"""""
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean, std),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomVerticalFlip(p=0.5),
+        transforms.RandomApply([transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2)], p=0.3),
+        transforms.RandomApply([transforms.Grayscale(num_output_channels=3)], p=0.05)
+    ])
+    
+    data_train = datasets.CIFAR10(get_data_dir(),
+                                  train=True,
+                                  download=True,
+                                  transform=transform)
+    
+    return torch.utils.data.ConcatDataset([data, data_train])
+    
+    
 
 def load_cifar10(batch_size: int, validation_fraction: float = 0.1
                  ) -> typing.List[torch.utils.data.DataLoader]:
     # Note that transform train will apply the same transform for
     # validation!
+    
     transform_train = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(mean, std),
     ])
+    
     transform_test = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(mean, std)
     ])
+    
     data_train = datasets.CIFAR10(get_data_dir(),
                                   train=True,
                                   download=True,
                                   transform=transform_train)
+    
+    # Extend the dataset
+    data_train = extend_dataset(data_train)
 
     data_test = datasets.CIFAR10(get_data_dir(),
                                  train=False,

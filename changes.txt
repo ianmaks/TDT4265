@@ -1,0 +1,102 @@
+Deeper FCNN Vs Before
+
+Before:
+Test Accuracy: 0.772 Test Loss: 0.716
+Train Accuracy: 0.822 Train Loss: 0.514
+
+Deep:
+Test Accuracy: 0.786 Test Loss: 0.720
+Train Accuracy: 0.900 Train Loss: 0.309
+Validation Accuracy: 0.804 Validation Loss: 0.613
+
+self.classifier = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(self.num_output_features, 2048),
+            nn.ReLU(),
+            nn.Linear(2048, 512),
+            nn.ReLU(),
+            nn.Linear(512, 64),
+            nn.ReLU(),
+            nn.Linear(64, num_classes),
+            # nn.Softmax()
+        )
+
+
+More Kernels:
+
+Test Accuracy: 0.794 Test Loss: 0.722
+Train Accuracy: 0.893 Train Loss: 0.329
+
+
+L2 Reg:
+
+Test Accuracy: 0.786 Test Loss: 0.726
+Train Accuracy: 0.890 Train Loss: 0.338
+
+
+Replacing the last maxpool with kernel of stride 2:
+Test Accuracy: 0.810 Test Loss: 0.588
+Train Accuracy: 0.856 Train Loss: 0.425
+
+
+
+New Architecture:
+Test Accuracy: 0.535 Test Loss: 1.923
+Train Accuracy: 0.499 Train Loss: 1.958
+
+
+self.feature_extractor = nn.Sequential(
+            nn.Conv2d(
+                in_channels=image_channels,
+                out_channels=num_filters,
+                kernel_size=5,
+                stride=stride,
+                padding=2,
+            ),
+            nn.ReLU(),
+            
+            nn.Conv2d(
+                in_channels=num_filters,
+                out_channels=64,
+                kernel_size=3,
+                stride=stride,
+                padding=1,
+            ),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            
+            nn.Conv2d(
+                    in_channels=64,
+                    out_channels=128,
+                    kernel_size=5,
+                    stride=stride,
+                    padding=2,
+                ),
+            nn.ReLU(),
+            nn.Conv2d(
+                    in_channels=128,
+                    out_channels=256,
+                    kernel_size=kernel_size,
+                    stride=stride,
+                    padding=padding,
+                ),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),    
+             
+            nn.Conv2d(
+                in_channels=256,
+                out_channels=512,
+                kernel_size=kernel_size,
+                stride=stride,
+                padding=padding,
+            ),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d( 
+                in_channels=512,
+                out_channels=1024,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+            ),
+        )
