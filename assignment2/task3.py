@@ -8,7 +8,7 @@ from task2 import SoftmaxTrainer, calculate_accuracy
 def main():
     # hyperparameters DO NOT CHANGE IF NOT SPECIFIED IN ASSIGNMENT TEXT
     num_epochs = 50
-    learning_rate = .1
+    learning_rate = 0.1
     batch_size = 32
     neurons_per_layer = [64 , 10]
     momentum_gamma = .9  # Task 3 hyperparameter
@@ -27,14 +27,19 @@ def main():
     Y_val = one_hot_encode(Y_val, 10)
 
     model = SoftmaxModel(
-        neurons_per_layer,
-        use_improved_sigmoid,
-        use_improved_weight_init,
-        use_relu)
+        neurons_per_layer, use_improved_sigmoid, use_improved_weight_init, use_relu
+    )
     trainer = SoftmaxTrainer(
-        momentum_gamma, use_momentum,
-        model, learning_rate, batch_size, shuffle_data,
-        X_train, Y_train, X_val, Y_val,
+        momentum_gamma,
+        use_momentum,
+        model,
+        learning_rate,
+        batch_size,
+        shuffle_data,
+        X_train,
+        Y_train,
+        X_val,
+        Y_val,
     )
     
     for i in range(2):
