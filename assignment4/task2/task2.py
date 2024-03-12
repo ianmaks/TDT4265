@@ -90,6 +90,11 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
             Each row includes [xmin, ymin, xmax, ymax]
     """
     # Find all possible matches with a IoU >= iou threshold
+    
+    #Transform all boxes to tuples to make them hashable
+    prediction_boxes = [tuple(box) for box in prediction_boxes]
+    gt_boxes = [tuple(box) for box in gt_boxes]
+    
     matches = []
     for i in range(len(prediction_boxes)):
         for j in range(len(gt_boxes)):
@@ -105,7 +110,8 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
 
     for i in range(len(matches)):
         if matches[i][1] not in visited and matches[i][2] not in visited:
-            visited.append([matches[i][1], matches[i][2]])
+            visited.append(matches[i][1])
+            visited.append(matches[i][2])
         else:
             matches.remove(matches[i])
 
@@ -134,12 +140,12 @@ def calculate_individual_image_result(prediction_boxes, gt_boxes, iou_threshold)
     """
 
     # All possible matches
-    tp, gt_boxes = get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold)
+    tp, _ = get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold)
     
     # All matches have to be unique (1 gt box can only have 1 prediction box) so these are all true positives
     num_tp = len(tp)
-    num_fp = max(len(prediction_boxes) - len(gt_boxes), 0)
-    num_fn = len(gt_boxes) - len(tp)
+    num_fp = len(prediction_boxes) - num_tp
+    num_fn = len(gt_boxes) - num_tp
     
     return {"true_pos": num_tp, "false_pos": num_fp, "false_neg": num_fn}
     
