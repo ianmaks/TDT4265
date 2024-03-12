@@ -90,6 +90,11 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
             Each row includes [xmin, ymin, xmax, ymax]
     """
     # Find all possible matches with a IoU >= iou threshold
+    
+    #Transform all boxes to tuples to make them hashable
+    prediction_boxes = [tuple(box) for box in prediction_boxes]
+    gt_boxes = [tuple(box) for box in gt_boxes]
+    
     matches = []
     for i in range(len(prediction_boxes)):
         for j in range(len(gt_boxes)):
@@ -105,7 +110,8 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
 
     for i in range(len(matches)):
         if matches[i][1] not in visited and matches[i][2] not in visited:
-            visited.append([matches[i][1], matches[i][2]])
+            visited.append(matches[i][1])
+            visited.append(matches[i][2])
         else:
             matches.remove(matches[i])
 
@@ -133,7 +139,16 @@ def calculate_individual_image_result(prediction_boxes, gt_boxes, iou_threshold)
             {"true_pos": int, "false_pos": int, false_neg": int}
     """
 
-    raise NotImplementedError
+    # All possible matches
+    tp, _ = get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold)
+    
+    # All matches have to be unique (1 gt box can only have 1 prediction box) so these are all true positives
+    num_tp = len(tp)
+    num_fp = len(prediction_boxes) - num_tp
+    num_fn = len(gt_boxes) - num_tp
+    
+    return {"true_pos": num_tp, "false_pos": num_fp, "false_neg": num_fn}
+    
 
 
 def calculate_precision_recall_all_images(
@@ -155,7 +170,19 @@ def calculate_precision_recall_all_images(
     Returns:
         tuple: (precision, recall). Both float.
     """
-    raise NotImplementedError
+    # Loop over all images and calculate the precision and recall
+    for i in range(len(all_prediction_boxes)):
+        res = calculate_individual_image_result(all_prediction_boxes[i], all_gt_boxes[i], iou_threshold)
+        if i == 0:
+            num_tp = res["true_pos"]
+            num_fp = res["false_pos"]
+            num_fn = res["false_neg"]
+        else:
+            num_tp += res["true_pos"]
+            num_fp += res["false_pos"]
+            num_fn += res["false_neg"]
+    
+    return calculate_precision(num_tp, num_fp, num_fn), calculate_recall(num_tp, num_fp, num_fn)
 
 
 def get_precision_recall_curve(
@@ -188,9 +215,29 @@ def get_precision_recall_curve(
     # curve, we will use an approximation
     confidence_thresholds = np.linspace(0, 1, 500)
     # YOUR CODE HERE
-
     precisions = [] 
     recalls = []
+    
+    for thresh in confidence_thresholds:
+        
+        # Remove all predictions with a confidence score lower than the threshold
+        indices_to_remove = []
+        
+        for image in range(len(confidence_scores)): # Loop over all images
+            for prediction in range(len(confidence_scores[image])): # Loop over all predictions
+                if confidence_scores[image][prediction] < thresh:
+                    indices_to_remove.append((image, prediction))
+        
+        for index in indices_to_remove:
+            all_prediction_boxes[index[0]] = np.delete(all_prediction_boxes[index[0]], index[1], axis=0)
+            confidence_scores[index[0]] = np.delete(confidence_scores[index[0]], index[1])
+                
+        # Calculate the precision and recall for the current threshold
+        precision, recall = calculate_precision_recall_all_images(all_prediction_boxes, all_gt_boxes, iou_threshold)
+        precisions.append(precision)
+        recalls.append(recall)
+
+    
     return np.array(precisions), np.array(recalls)
 
 
