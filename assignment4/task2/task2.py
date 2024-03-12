@@ -170,7 +170,19 @@ def calculate_precision_recall_all_images(
     Returns:
         tuple: (precision, recall). Both float.
     """
-    raise NotImplementedError
+    # Loop over all images and calculate the precision and recall
+    for i in range(len(all_prediction_boxes)):
+        res = calculate_individual_image_result(all_prediction_boxes[i], all_gt_boxes[i], iou_threshold)
+        if i == 0:
+            num_tp = res["true_pos"]
+            num_fp = res["false_pos"]
+            num_fn = res["false_neg"]
+        else:
+            num_tp += res["true_pos"]
+            num_fp += res["false_pos"]
+            num_fn += res["false_neg"]
+    
+    return calculate_precision(num_tp, num_fp, num_fn), calculate_recall(num_tp, num_fp, num_fn)
 
 
 def get_precision_recall_curve(
@@ -203,9 +215,29 @@ def get_precision_recall_curve(
     # curve, we will use an approximation
     confidence_thresholds = np.linspace(0, 1, 500)
     # YOUR CODE HERE
-
     precisions = [] 
     recalls = []
+    
+    for thresh in confidence_thresholds:
+        
+        # Remove all predictions with a confidence score lower than the threshold
+        indices_to_remove = []
+        
+        for image in range(len(confidence_scores)): # Loop over all images
+            for prediction in range(len(confidence_scores[image])): # Loop over all predictions
+                if confidence_scores[image][prediction] < thresh:
+                    indices_to_remove.append((image, prediction))
+        
+        for index in indices_to_remove:
+            all_prediction_boxes[index[0]] = np.delete(all_prediction_boxes[index[0]], index[1], axis=0)
+            confidence_scores[index[0]] = np.delete(confidence_scores[index[0]], index[1])
+                
+        # Calculate the precision and recall for the current threshold
+        precision, recall = calculate_precision_recall_all_images(all_prediction_boxes, all_gt_boxes, iou_threshold)
+        precisions.append(precision)
+        recalls.append(recall)
+
+    
     return np.array(precisions), np.array(recalls)
 
 
