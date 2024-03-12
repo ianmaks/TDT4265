@@ -108,12 +108,17 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
     # Find all matches with the highest IoU threshold
     visited = []
 
-    for i in range(len(matches)):
+    i = 0
+    while 1:
+        if i == len(matches):
+            break
         if matches[i][1] not in visited and matches[i][2] not in visited:
             visited.append(matches[i][1])
             visited.append(matches[i][2])
         else:
             matches.remove(matches[i])
+            i-=1
+        i+=1
 
     res = list(zip(*matches))
     if len(res) == 0:
@@ -221,17 +226,19 @@ def get_precision_recall_curve(
     for thresh in confidence_thresholds:
         
         # Remove all predictions with a confidence score lower than the threshold
-        indices_to_remove = []
+        indices_to_remove = {}
         
         for image in range(len(confidence_scores)): # Loop over all images
             for prediction in range(len(confidence_scores[image])): # Loop over all predictions
                 if confidence_scores[image][prediction] < thresh:
-                    indices_to_remove.append((image, prediction))
+                    if image not in indices_to_remove:
+                        indices_to_remove[image] = []
+                    indices_to_remove[image].append(prediction)
         
-        for index in indices_to_remove:
-            all_prediction_boxes[index[0]] = np.delete(all_prediction_boxes[index[0]], index[1], axis=0)
-            confidence_scores[index[0]] = np.delete(confidence_scores[index[0]], index[1])
-                
+        for image in indices_to_remove:
+            all_prediction_boxes[image] = np.delete(all_prediction_boxes[image], indices_to_remove[image], axis=0)
+            confidence_scores[image] = np.delete(confidence_scores[image], indices_to_remove[image])
+        
         # Calculate the precision and recall for the current threshold
         precision, recall = calculate_precision_recall_all_images(all_prediction_boxes, all_gt_boxes, iou_threshold)
         precisions.append(precision)
@@ -275,17 +282,17 @@ def calculate_mean_average_precision(precisions, recalls):
     recall_levels = np.linspace(0, 1.0, 11)
     precisions = precisions[::-1]
     recalls = recalls[::-1]
-    print(recalls)
-
-    for i in range(len(precisions)):
-        precisions[i] = max(precisions[recalls >= recall_levels[i]])
-        print(precisions[i])
-
-
-    # YOUR CODE HERE
-    average_precision = np.sum(precisions) / 11
-    return average_precision.round(5)
-
+    
+    # Generate a smoothed curve
+    precission_recal_curve = [] # at indicces 
+    for recall_level in recall_levels:
+        indices = np.where(recalls >= recall_level)
+        if len(indices[0]) == 0:
+            precission_recal_curve.append(0)
+        else:
+            precission_recal_curve.append(max(precisions[indices]))
+            
+    return np.mean(precission_recal_curve)
 
 def mean_average_precision(ground_truth_boxes, predicted_boxes):
     """ Calculates the mean average precision over the given dataset
