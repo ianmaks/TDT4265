@@ -226,9 +226,18 @@ def calculate_mean_average_precision(precisions, recalls):
     """
     # Calculate the mean average precision given these recall levels.
     recall_levels = np.linspace(0, 1.0, 11)
+    precisions = precisions[::-1]
+    recalls = recalls[::-1]
+    print(recalls)
+
+    for i in range(len(precisions)):
+        precisions[i] = max(precisions[recalls >= recall_levels[i]])
+        print(precisions[i])
+
+
     # YOUR CODE HERE
-    average_precision = 0
-    return average_precision
+    average_precision = np.sum(precisions) / 11
+    return average_precision.round(5)
 
 
 def mean_average_precision(ground_truth_boxes, predicted_boxes):
