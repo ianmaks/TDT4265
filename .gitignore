@@ -3,6 +3,9 @@
 .DS_Store
 .AppleDouble
 .LSOverride
+.vscode/
+plots/
+
 
 # Icon must end with two \r
 Icon
