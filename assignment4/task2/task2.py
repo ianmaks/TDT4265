@@ -90,7 +90,7 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
             Each row includes [xmin, ymin, xmax, ymax]
     """
     # Find all possible matches with a IoU >= iou threshold
-
+    
 
     # Sort all matches on IoU in descending order
 
@@ -119,7 +119,16 @@ def calculate_individual_image_result(prediction_boxes, gt_boxes, iou_threshold)
             {"true_pos": int, "false_pos": int, false_neg": int}
     """
 
-    raise NotImplementedError
+    # All possible matches
+    tp, gt_boxes = get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold)
+    
+    # All matches have to be unique (1 gt box can only have 1 prediction box) so these are all true positives
+    num_tp = len(tp)
+    num_fp = max(len(prediction_boxes) - len(gt_boxes), 0)
+    num_fn = len(gt_boxes) - len(tp)
+    
+    return {"true_pos": num_tp, "false_pos": num_fp, "false_neg": num_fn}
+    
 
 
 def calculate_precision_recall_all_images(
