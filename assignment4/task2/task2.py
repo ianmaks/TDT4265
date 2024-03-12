@@ -95,7 +95,7 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
         for j in range(len(gt_boxes)):
             iou = calculate_iou(prediction_boxes[i], gt_boxes[j])
             if iou >= iou_threshold:
-                matches.append(iou, predicted_boxes[i], gt_boxes[j])
+                matches.append((iou, prediction_boxes[i], gt_boxes[j]))
                 
     # Sort all matches on IoU in descending order
     matches.sort(key=lambda x: x[0], reverse=True)
@@ -104,12 +104,14 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
     visited = []
 
     for i in range(len(matches)):
-        if matches[i][1] not in visited & matches[i][2] not in visited:
+        if matches[i][1] not in visited and matches[i][2] not in visited:
             visited.append([matches[i][1], matches[i][2]])
         else:
             matches.remove(matches[i])
 
     res = list(zip(*matches))
+    if len(res) == 0:
+        return np.array([]), np.array([])
     return np.array(res[1]), np.array(res[2])
 
 
