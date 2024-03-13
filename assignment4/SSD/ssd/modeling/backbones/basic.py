@@ -1,8 +1,8 @@
-import torch
+from torch import conv2d, nn
 from typing import Tuple, List
 
 
-class BasicModel(torch.nn.Module):
+class BasicModel(nn.Module):
     """
     This is a basic backbone for SSD.
     The feature extractor outputs a list of 6 feature maps, with the sizes:
@@ -13,6 +13,14 @@ class BasicModel(torch.nn.Module):
      shape(-1, output_channels[3], 3, 3),
      shape(-1, output_channels[4], 1, 1)]
     """
+    filter_size = 3
+    conv_stride = 1
+    conv_padding = 1
+
+    pool_size = 2
+    pool_stride = 2
+
+
     def __init__(self,
             output_channels: List[int],
             image_channels: int,
@@ -20,6 +28,23 @@ class BasicModel(torch.nn.Module):
         super().__init__()
         self.out_channels = output_channels
         self.output_feature_shape = output_feature_sizes
+        self.feature_extractor = nn.Sequential(
+            nn.Conv2d(in_channels=image_channels, out_channels=32,  kernel_size=self.filter_size, stride = 1, padding = self.conv_padding),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=self.pool_stride),
+            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=self.filter_size, stride = 1, padding = self.conv_padding),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride = self.pool_stride),
+
+            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=self.filter_size, stride=1, padding=self.conv_padding),
+            nn.ReLU(),
+            nn.Conv2d(in_channels=32, out_channels=output_channels[0], kernel_size=self.filter_size, stride=2, padding = 1),
+            nn.ReLU(),
+
+            
+            )
+        
+        
 
     def forward(self, x):
         """
